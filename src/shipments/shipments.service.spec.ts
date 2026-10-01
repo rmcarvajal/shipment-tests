@@ -9,8 +9,8 @@ describe('ShipmentServiceTest', () => {
     let service: ShipmentsService;
 
     const RepositoryMock = {
-        find: jest.fn(),
-        findOneBy: jest.fn(),
+        find: jest.fn<(options: any) => Promise<ShipmentEntity | null>>(),
+        findOneBy: jest.fn<(options: any) => Promise<ShipmentEntity | null>>(),
         create: jest.fn(),
         save: jest.fn(),
     };  
@@ -44,20 +44,13 @@ describe('ShipmentServiceTest', () => {
 
     it('returns all shipments', async () => {
 
-        const shipmentMock: ShipmentEntity[] = [
+        const shipmentMock =
         {
             id: 1,
             trackingCode: '123jeb',
             destination: 'somewhere idk',
             status: 'created'
-        },
-        {
-            id: 2,
-            trackingCode: '413john',
-            destination: 'sburb',
-            status: 'created'            
-        }
-    ] as ShipmentEntity[];
+        } as ShipmentEntity;
         RepositoryMock.find.mockResolvedValue(shipmentMock)
 
         const result = await service.findAll();
