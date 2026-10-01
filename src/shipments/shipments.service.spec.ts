@@ -4,6 +4,7 @@ import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { ShipmentEntity } from './entities/shipment.entity';
 import { ShipmentRulesService } from './shipment-rules.service';
+import { NotFoundException } from '@nestjs/common';
 
 describe('ShipmentServiceTest', () => {
     let service: ShipmentsService;
@@ -12,7 +13,7 @@ describe('ShipmentServiceTest', () => {
         find: jest.fn<(options: any) => Promise<ShipmentEntity | null>>(),
         findOneBy: jest.fn<(options: any) => Promise<ShipmentEntity | null>>(),
         create: jest.fn(),
-        save: jest.fn(),
+        save: jest.fn<(options: any) => Promise<ShipmentEntity | null>>(),
     };  
     const RuleServiceMock = {
         ensureCanBeDispatched: jest.fn()
@@ -72,5 +73,25 @@ describe('ShipmentServiceTest', () => {
 
         expect(result).toEqual(shipmentMock);
 
+    })
+
+    it('throws NotFoundException when the id does not exist',async () => {
+        RepositoryMock.findOneBy.mockResolvedValue(null)
+                
+        await expect(service.findOne(999)).rejects.toBeInstanceOf(NotFoundException)
+    })
+
+    it('creates and saves a shipment',async () => {
+        const shipmentMock = {
+        trackingCode: 'SHIP-100',
+        destination: 'Cali',
+        } as ShipmentEntity;
+        RepositoryMock.create.mockReturnValue(shipmentMock)
+        
+        const result = await service.create(shipmentMock)
+        
+        expect(result).toEqual(shipmentMock)
+        expect.objectContaining({status: 'created'})
+        expect(RepositoryMock.save).toHaveBeenCalled()
     })
 })
