@@ -102,5 +102,21 @@ describe('ShipmentServiceTest', () => {
         expect.objectContaining({status: 'created'});
         expect(RepositoryMock.save).toHaveBeenCalled();
     })
+    
+    it('dispatches and saves a valid shipment',async () => {
+        const shipmentMock = 
+        {
+            id: 5,
+            trackingCode: '00x0000012',
+            destination: 'beepboopland',
+            status: 'created'
+        } as ShipmentEntity;
+        RepositoryMock.findOneBy.mockResolvedValue(shipmentMock)
+        RepositoryMock.save.mockResolvedValue(shipmentMock)
 
+        const result = await service.dispatch(5);
+
+        expect(RuleServiceMock.ensureCanBeDispatched).toHaveBeenCalled()
+        expect.objectContaining({status: 'dispatched'});
+    })
 })
